@@ -1,6 +1,6 @@
 class Config:
 
-    data_location = r'C://Users//Cristian//Documents//gitlab//complex_networks//coil-20-proc//'
+    data_location = r'Insert database location here'
     object_number = 20
     object_poses = 72
     object_poses_used = 18
