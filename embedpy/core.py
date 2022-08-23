@@ -1,4 +1,3 @@
-from email import feedparser
 from embedpy.config import Config
 from scipy.spatial import Delaunay
 from itertools import permutations, combinations, product
