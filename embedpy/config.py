@@ -1,6 +1,6 @@
 class Config:
 
-    data_location = r'Insert database location here'
+    data_location = r'Introduce data location here'
     object_number = 20
     object_poses = 72
     object_poses_used = 18

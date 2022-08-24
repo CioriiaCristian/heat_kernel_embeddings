@@ -97,14 +97,23 @@ def gaussian_curvature(triangle, points, time, eigvalues, eigvecmatrix):
         sec_curvature = sectional_curvature(
             pair[0], pair[1], time, eigvalues, eigvecmatrix
         )
-        sectional_radii_list.append(sec_curvature)
+        if sec_curvature > 1e-10:
+            sectional_radii_list.append(1/sec_curvature)
+        else:
+            sectional_radii_list.append(1e10)
 
     avg_sectional_radius = np.mean(np.array(sectional_radii_list))
     avg_square_euclidean_distance = np.mean(np.array(euclidean_distances_list) ** 2)
+    """
     total_internal_angle = np.sum(1 / np.array(sectional_radii_list)) / 2
 
     return avg_square_euclidean_distance / (
         2 * avg_sectional_radius**3 * (total_internal_angle - np.pi)
+    )
+
+    """
+    return avg_square_euclidean_distance / (
+        2 * avg_sectional_radius**3 
     )
 
 
@@ -115,7 +124,7 @@ def generate_curvature_files(t, obj, pose):
     )
 
     image_filename = Config.data_location + image_name_format(obj, pose)
-    
+
     points = find_feature_points(image_filename)
 
     tri = Delaunay(points)
@@ -290,3 +299,30 @@ def save_multiscaling_embedding_figure(x_embedding, time, feature_type, metric_t
     plt.scatter(x_embedding[:,0][poses_used_no:poses_used_no*2], x_embedding[:,1][poses_used_no:poses_used_no*2])
     plt.scatter(x_embedding[:,0][poses_used_no*2:poses_used_no*3],x_embedding[:,1][poses_used_no*2:poses_used_no*3])
     plt.savefig(directory_name + 'fig_time_'+str(time).rjust(5,'0')+'.png')
+
+def compute_rand_index(x_embedding):
+
+    poses_used_no = Config.object_poses_used
+    means_array = np.array([
+    np.mean(x_embedding[:poses_used_no],axis=0),
+    np.mean(x_embedding[poses_used_no:poses_used_no*2],axis=0),
+    np.mean(x_embedding[poses_used_no*2:poses_used_no*3],axis=0),
+    ])
+
+    cluster_correct_position = []
+    for idx,graph_coords in enumerate(x_embedding):
+        cluster_distance = [
+        np.linalg.norm(graph_coords - means_array[0]),
+        np.linalg.norm(graph_coords - means_array[1]),
+        np.linalg.norm(graph_coords - means_array[2]),
+        ]
+        if idx < poses_used_no:
+            cluster_correct_position.append(np.argsort(cluster_distance)[0] == 0)
+        elif idx > poses_used_no and idx < poses_used_no*2:
+            cluster_correct_position.append(np.argsort(cluster_distance)[0] == 1)
+        else:
+            cluster_correct_position.append(np.argsort(cluster_distance)[0] == 2)
+        
+    return (len(cluster_correct_position) -sum(cluster_correct_position))/len(cluster_correct_position)
+
+

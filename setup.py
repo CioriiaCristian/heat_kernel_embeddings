@@ -1,5 +1,7 @@
 from embedpy import core
 from embedpy.config import Config
+from itertools import combinations
+from tqdm import tqdm
 import numpy as np
 import os
 
@@ -35,11 +37,15 @@ if isdir == False:
     for _path in plot_paths:
         os.mkdir(_path)
 
-object_indeces = [np.random.randint(1,Config.object_number) for i in range(Config.object_sample_size)]
+# Choose 3 random numbers, without duplicates
+combs = list(combinations(np.arange(1,Config.object_number),Config.object_sample_size))
+object_indeces = combs[np.random.randint(len(combs))]
+
 print(f'The following objects have been chosen :{object_indeces}')
 poses_list = list(range(Config.object_poses))[::4]
 time_domain = Config.time_domain
-for obj in object_indeces:
+print('Currently generating all curvature files...')
+for obj in tqdm(object_indeces):
     for pose in poses_list:
         for t in time_domain:
             core.generate_curvature_files(t,obj,pose)
